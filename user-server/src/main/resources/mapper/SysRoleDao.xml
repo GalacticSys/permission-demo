@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hjt.client.dao.SysRoleDao">
+
+    <resultMap type="com.hjt.client.entity.SysRole" id="SysRoleMap">
+        <result property="roleId" column="role_id" jdbcType="INTEGER"/>
+        <result property="roleName" column="role_name" jdbcType="VARCHAR"/>
+        <result property="roleDescription" column="role_description" jdbcType="VARCHAR"/>
+        <result property="roleCode" column="role_code" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="queryRoleWhere">
+        <where>
+            <if test="sysRole.roleId != null">
+                and role_id = #{sysRole.roleId}
+            </if>
+            <if test="sysRole.roleName != null and sysRole.roleName != ''">
+                and role_name = #{sysRole.roleName}
+            </if>
+            <if test="sysRole.roleDescription != null and sysRole.roleDescription != ''">
+                and role_description = #{sysRole.roleDescription}
+            </if>
+            <if test="sysRole.roleCode != null and sysRole.roleCode != ''">
+                and role_code = #{sysRole.roleCode}
+            </if>
+        </where>
+    </sql>
+
+    <!--通过实体作为筛选条件分页查询-->
+    <select id="queryAllBySysRole" resultMap="SysRoleMap">
+        select *
+        from sys_role
+        <include refid="queryRoleWhere"/>
+    </select>
+
+
+    <!--通过用户id查询-->
+    <select id="queryAllByUserId" resultMap="SysRoleMap">
+        select *
+        from sys_user_role_relation
+        inner join sys_role on sys_user_role_relation.role_id=sys_role.role_id
+        where sys_user_role_relation.user_id=#{uId}
+    </select>
+
+    <!--新增所有列-->
+    <insert id="insert">
+        insert into sys_role(role_name, role_description, role_code)
+        values (#{sysRole.roleName}, #{sysRole.roleDescription}, #{sysRole.roleCode})
+    </insert>
+
+    <!--通过主键修改数据-->
+    <update id="update">
+        update sys_role
+        <set>
+            <if test="sysRole.roleName != null and sysRole.roleName != ''">
+                role_name = #{sysRole.roleName},
+            </if>
+            <if test="sysRole.roleDescription != null and sysRole.roleDescription != ''">
+                role_description = #{sysRole.roleDescription},
+            </if>
+            <if test="sysRole.roleCode != null and sysRole.roleCode != ''">
+                role_code = #{sysRole.roleCode},
+            </if>
+        </set>
+        where role_id = #{sysRole.roleId}
+    </update>
+
+    <!--通过主键删除-->
+    <delete id="deleteById">
+        delete from sys_role where role_id = #{roleId}
+    </delete>
+
+</mapper>

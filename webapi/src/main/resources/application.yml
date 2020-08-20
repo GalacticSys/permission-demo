@@ -1,0 +1,30 @@
+server:
+  port: 8083
+#feign:
+#  hystrix:
+#    enabled: true
+spring:
+  application:
+    name: webapi
+  cloud:
+    consul:
+      host: localhost
+      port: 8500
+      discovery:
+        serviceName: webapi    # 注册到consul的服务名称
+  main:
+    allow-bean-definition-overriding: true
+  security:
+    user:
+      name: admin
+      password: admin
+    basic:
+      enabled: false
+  thymeleaf:
+    cache: false
+
+#  mvc:
+#    view:
+#      prefix: classpath:templates/
+#      suffix: .html
+

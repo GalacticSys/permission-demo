@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hjt.client.dao.SysUserDao">
+
+<!--    用户信息-->
+    <resultMap type="com.hjt.client.entity.SysUser" id="SysUserMap">
+        <result property="userId" column="user_id" jdbcType="INTEGER"/>
+        <result property="account" column="account" jdbcType="VARCHAR"/>
+        <result property="userName" column="user_name" jdbcType="VARCHAR"/>
+        <result property="password" column="password" jdbcType="VARCHAR"/>
+        <result property="lastLoginTime" column="last_login_time" jdbcType="TIMESTAMP"/>
+        <result property="enabled" column="enabled" jdbcType="OTHER"/>
+        <result property="notExpired" column="not_expired" jdbcType="OTHER"/>
+        <result property="accountNotLocked" column="account_not_locked" jdbcType="OTHER"/>
+        <result property="credentialsNotExpired" column="credentials_not_expired" jdbcType="OTHER"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
+        <result property="createUser" column="create_user" jdbcType="INTEGER"/>
+        <result property="updateUser" column="update_user" jdbcType="INTEGER"/>
+        <collection  property="sysRoles" resultMap="SysRoleMap" />
+    </resultMap>
+
+    <resultMap type="com.hjt.client.entity.SysRole" id="SysRoleMap">
+        <result property="roleId" column="role_id" jdbcType="INTEGER"/>
+        <result property="roleName" column="role_name" jdbcType="VARCHAR"/>
+        <result property="roleDescription" column="role_description" jdbcType="VARCHAR"/>
+        <result property="roleCode" column="role_code" jdbcType="VARCHAR"/>
+        <collection  property="sysPermissions" resultMap="SysPermissionMap" />
+        <collection  property="sysMenus" resultMap="SysMenuMap" />
+    </resultMap>
+
+    <resultMap type="com.hjt.client.entity.SysPermission" id="SysPermissionMap">
+        <result property="permissionId" column="permission_id" jdbcType="INTEGER"/>
+        <result property="permissionCode" column="permission_code" jdbcType="VARCHAR"/>
+        <result property="permissionName" column="permission_name" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <resultMap type="com.hjt.client.entity.SysMenu" id="SysMenuMap">
+        <result property="menuId" column="menu_id" jdbcType="INTEGER"/>
+        <result property="menuPath" column="menu_path" jdbcType="VARCHAR"/>
+        <result property="menuParentId" column="menu_parent_id" jdbcType="INTEGER"/>
+        <result property="menuName" column="menu_name" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="queryUserWhere">
+        <where>
+            <if test="sysUser.userId != null">
+                and user_id = #{sysUser.userId}
+            </if>
+            <if test="sysUser.account != null and sysUser.account != ''">
+                and account = #{sysUser.account}
+            </if>
+            <if test="sysUser.userName != null and sysUser.userName != ''">
+                and user_name = #{sysUser.userName}
+            </if>
+            <if test="sysUser.password != null and sysUser.password != ''">
+                and password = #{sysUser.password}
+            </if>
+            <if test="sysUser.lastLoginTime != null">
+                and last_login_time = #{sysUser.lastLoginTime}
+            </if>
+            <if test="sysUser.enabled != null">
+                and enabled = #{sysUser.enabled}
+            </if>
+            <if test="sysUser.notExpired != null">
+                and not_expired = #{sysUser.notExpired}
+            </if>
+            <if test="sysUser.accountNotLocked != null">
+                and account_not_locked = #{sysUser.accountNotLocked}
+            </if>
+            <if test="sysUser.credentialsNotExpired != null">
+                and credentials_not_expired = #{sysUser.credentialsNotExpired}
+            </if>
+            <if test="sysUser.createTime != null">
+                and create_time = #{sysUser.createTime}
+            </if>
+            <if test="sysUser.updateTime != null">
+                and update_time = #{sysUser.updateTime}
+            </if>
+            <if test="sysUser.createUser != null">
+                and create_user = #{sysUser.createUser}
+            </if>
+            <if test="sysUser.updateUser != null">
+                and update_user = #{sysUser.updateUser}
+            </if>
+        </where>
+    </sql>
+
+
+
+
+    <!--查询单个(登录)-->
+    <select id="queryUserAndRoleAndPermissionAndUrlByName" resultMap="SysUserMap">
+        SELECT *
+        FROM sys_user as u
+        LEFT JOIN sys_user_role_relation as urr on u.user_id=urr.user_id
+        LEFT JOIN sys_role as r on urr.role_id=r.role_id
+        LEFT JOIN sys_role_permission_relation as rpr on r.role_id=rpr.role_id
+        LEFT JOIN sys_permission as p on rpr.permission_id=p.permission_id
+        LEFT JOIN sys_role_menu_relation rmr on r.role_id=rmr.r_id
+        LEFT JOIN sys_menu as m on rmr.m_id=m.menu_id
+        where u.user_name=#{name}
+    </select>
+
+    <!--通过实体作为筛选条件分页查询-->
+    <select id="queryAllBySysUser" resultMap="SysUserMap">
+        SELECT *
+        FROM sys_user
+        <include refid="queryUserWhere"/>
+    </select>
+
+
+    <!--新增所有列-->
+    <insert id="insert">
+        insert into sys_user(account, user_name, password, last_login_time, enabled, not_expired, account_not_locked, credentials_not_expired, create_time, update_time, create_user, update_user)
+        values (#{sysUser.account}, #{sysUser.userName}, #{sysUser.password}, #{sysUser.lastLoginTime}, #{sysUser.enabled}, #{sysUser.notExpired}, #{sysUser.accountNotLocked}, #{sysUser.credentialsNotExpired}, #{sysUser.createTime}, #{sysUser.updateTime}, #{sysUser.createUser}, #{sysUser.updateUser})
+    </insert>
+
+    <!--通过主键修改数据-->
+    <update id="update">
+        update sys_user
+        <set>
+            <if test="sysUser.account != null and sysUser.account != ''">
+                account = #{sysUser.account},
+            </if>
+            <if test="sysUser.userName != null and sysUser.userName != ''">
+                user_name = #{sysUser.userName},
+            </if>
+            <if test="sysUser.password != null and sysUser.password != ''">
+                password = #{sysUser.password},
+            </if>
+            <if test="sysUser.lastLoginTime != null">
+                last_login_time = #{sysUser.lastLoginTime},
+            </if>
+            <if test="sysUser.enabled != null">
+                enabled = #{sysUser.enabled},
+            </if>
+            <if test="sysUser.notExpired != null">
+                not_expired = #{sysUser.notExpired},
+            </if>
+            <if test="sysUser.accountNotLocked != null">
+                account_not_locked = #{sysUser.accountNotLocked},
+            </if>
+            <if test="sysUser.credentialsNotExpired != null">
+                credentials_not_expired = #{sysUser.credentialsNotExpired},
+            </if>
+            <if test="sysUser.createTime != null">
+                create_time = #{sysUser.createTime},
+            </if>
+            <if test="sysUser.updateTime != null">
+                update_time = #{sysUser.updateTime},
+            </if>
+            <if test="sysUser.createUser != null">
+                create_user = #{sysUser.createUser},
+            </if>
+            <if test="sysUser.updateUser != null">
+                update_user = #{sysUser.updateUser},
+            </if>
+        </set>
+        where user_id = #{sysUser.userId}
+    </update>
+
+    <!--通过主键删除-->
+    <delete id="deleteById">
+        delete from sys_user where user_id = #{userId}
+    </delete>
+</mapper>

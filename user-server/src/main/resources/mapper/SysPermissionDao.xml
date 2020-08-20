@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hjt.client.dao.SysPermissionDao">
+
+    <resultMap type="com.hjt.client.entity.SysPermission" id="SysPermissionMap">
+        <result property="permissionId" column="permission_id" jdbcType="INTEGER"/>
+        <result property="permissionCode" column="permission_code" jdbcType="VARCHAR"/>
+        <result property="permissionName" column="permission_name" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="queryPermissionWhere">
+        <where>
+            <if test="sysPermission.permissionId != null">
+                and permission_id = #{sysPermission.permissionId}
+            </if>
+            <if test="sysPermission.permissionCode != null and sysPermission.permissionCode != ''">
+                and permission_code = #{sysPermission.permissionCode}
+            </if>
+            <if test="sysPermission.permissionName != null and sysPermission.permissionName != ''">
+                and permission_name = #{sysPermission.permissionName}
+            </if>
+        </where>
+    </sql>
+
+    <!--通过实体作为筛选条件分页·查询-->
+    <select id="queryAllByPermission" resultMap="SysPermissionMap">
+        select *
+        from sys_permission
+        <include refid="queryPermissionWhere"></include>
+    </select>
+
+    <!--根据角色id查询-->
+    <select id="queryByRoleId" resultMap="SysPermissionMap">
+        select *
+        from sys_role_permission_relation
+        inner join sys_permission on sys_role_permission_relation.permission_id=sys_permission.permission_id
+        where sys_role_permission_relation.role_id=#{roleId}
+    </select>
+
+    <!--新增所有列-->
+    <insert id="insert">
+        insert into sys_permission(permission_code, permission_name)
+        values (#{sysPermission.permissionCode}, #{sysPermission.permissionName})
+    </insert>
+
+    <!--通过主键修改数据-->
+    <update id="update">
+        update sys_permission
+        <set>
+            <if test="sysPermission.permissionCode != null and sysPermission.permissionCode != ''">
+                permission_code = #{sysPermission.permissionCode},
+            </if>
+            <if test="sysPermission.permissionName != null and sysPermission.permissionName != ''">
+                permission_name = #{sysPermission.permissionName},
+            </if>
+        </set>
+        where permission_id = #{sysPermission.permissionId}
+    </update>
+
+    <!--通过主键删除-->
+    <delete id="deleteById">
+        delete from sys_permission where permission_id = #{permissionId}
+    </delete>
+
+</mapper>
